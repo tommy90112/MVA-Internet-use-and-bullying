@@ -1,6 +1,12 @@
 # 忽略整個 data 目錄
 /data/
 
+# 忽略 Python 虛擬環境
+/myenv/
+/venv/
+__pycache__/
+*.pyc
+
 # 忽略特定類型的數據文件
 *.csv
 *.xlsx
