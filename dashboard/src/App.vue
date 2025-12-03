@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import {
   projectInfo,
   datasetStats,
@@ -8,20 +8,29 @@ import {
   clusterResults,
   keyFindings
 } from './data/analysisData'
+import { translations, getClusterLabel, getClusterDesc, getFeatureName } from './i18n/translations'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const sections = [
-  { id: 'hero', label: '首頁' },
-  { id: 'problem', label: '研究問題' },
-  { id: 'data', label: '資料概覽' },
-  { id: 'gap', label: 'GAP分析' },
-  { id: 'pca', label: 'PCA分析' },
-  { id: 'ml', label: '機器學習' },
-  { id: 'conclusion', label: '結論' }
-]
+// 語言切換
+const currentLang = ref('zh')
+const t = computed(() => translations[currentLang.value])
+
+const toggleLang = () => {
+  currentLang.value = currentLang.value === 'zh' ? 'en' : 'zh'
+}
+
+const sections = computed(() => [
+  { id: 'hero', label: t.value.nav.home },
+  { id: 'problem', label: t.value.nav.problem },
+  { id: 'data', label: t.value.nav.data },
+  { id: 'gap', label: t.value.nav.gap },
+  { id: 'pca', label: t.value.nav.pca },
+  { id: 'ml', label: t.value.nav.ml },
+  { id: 'conclusion', label: t.value.nav.conclusion }
+])
 
 const activeSection = ref('hero')
 const showScrollTop = ref(false)
@@ -92,7 +101,7 @@ const getRiskColor = (level) => {
       <div class="nav-content">
         <div class="nav-logo">
           <img src="/images/logo.png" alt="Logo" class="logo-img" />
-          <span class="logo-text">網路霸凌研究</span>
+          <span class="logo-text">{{ t.nav.logo }}</span>
         </div>
         <div class="nav-links">
           <button
@@ -103,6 +112,10 @@ const getRiskColor = (level) => {
           >
             {{ section.label }}
           </button>
+          <!-- 語言切換按鈕 -->
+          <button @click="toggleLang" class="lang-toggle">
+            {{ currentLang === 'zh' ? 'EN' : '中文' }}
+          </button>
         </div>
       </div>
     </nav>
@@ -110,35 +123,35 @@ const getRiskColor = (level) => {
     <!-- ==================== 起：Hero ==================== -->
     <section id="hero" class="hero-section">
       <div class="hero-content">
-        <div class="hero-badge">統計學系數據科學所碩士班 ｜ MVA 專題報告呈現</div>
+        <div class="hero-badge">{{ t.hero.badge }}</div>
         <h1 class="hero-title">
-          網路行為與霸凌傾向<br/>
-          <span class="highlight">多變量分析研究</span>
+          {{ t.hero.title }}<br/>
+          <span class="highlight">{{ t.hero.highlight }}</span>
         </h1>
         <p class="hero-desc">
-          運用 GAP、PCA、機器學習等方法，探討不同群體的網路使用行為與霸凌傾向關聯
+          {{ t.hero.desc }}
         </p>
 
         <!-- 核心指標 -->
         <div class="hero-stats">
           <div class="stat-item">
             <div class="stat-number">672</div>
-            <div class="stat-label">有效樣本</div>
+            <div class="stat-label">{{ t.hero.samples }}</div>
           </div>
           <div class="stat-divider"></div>
           <div class="stat-item">
             <div class="stat-number">5</div>
-            <div class="stat-label">群體分類</div>
+            <div class="stat-label">{{ t.hero.clusters }}</div>
           </div>
           <div class="stat-divider"></div>
           <div class="stat-item">
             <div class="stat-number">71%</div>
-            <div class="stat-label">預測 AUC</div>
+            <div class="stat-label">{{ t.hero.auc }}</div>
           </div>
         </div>
 
         <button @click="scrollToSection('problem')" class="hero-cta">
-          開始探索
+          {{ t.hero.cta }}
           <svg class="cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
           </svg>
@@ -150,64 +163,61 @@ const getRiskColor = (level) => {
     <section id="problem" class="section section-light">
       <div class="section-container">
         <div class="section-header fade-up">
-          <span class="section-number">01</span>
-          <h2 class="section-title">研究問題</h2>
+          <span class="section-number">{{ t.problem.section }}</span>
+          <h2 class="section-title">{{ t.problem.title }}</h2>
         </div>
 
         <div class="problem-grid fade-up">
           <div class="problem-main">
             <div class="question-card">
               <div class="question-icon">❓</div>
-              <h3>核心問題</h3>
-              <p class="question-text">
-                不同人口特徵與網路使用行為的群體，<br/>
-                其<strong>網路霸凌傾向</strong>是否存在顯著差異？
-              </p>
+              <h3>{{ t.problem.coreQuestion }}</h3>
+              <p class="question-text" v-html="t.problem.coreText"></p>
             </div>
           </div>
 
           <div class="problem-sub">
             <div class="sub-question">
               <span class="sub-number">1</span>
-              <p>如何識別具有不同網路行為模式的群體？</p>
+              <p>{{ t.problem.sub1 }}</p>
             </div>
             <div class="sub-question">
               <span class="sub-number">2</span>
-              <p>哪些因素最能預測高霸凌傾向？</p>
+              <p>{{ t.problem.sub2 }}</p>
             </div>
             <div class="sub-question">
               <span class="sub-number">3</span>
-              <p>能否建立有效的風險預測模型？</p>
+              <p>{{ t.problem.sub3 }}</p>
             </div>
           </div>
         </div>
 
         <!-- 研究方法概覽 -->
         <div class="method-overview fade-up">
-          <h3 class="method-title">分析方法</h3>
+          <h3 class="method-title">{{ t.problem.methodTitle }}</h3>
           <div class="method-flow">
             <div class="method-step">
               <div class="step-icon">🔍</div>
-              <div class="step-name">GAP 分析</div>
-              <div class="step-desc">群體識別</div>
+              <div class="step-name">{{ t.problem.gap }}</div>
+              <div class="step-desc">{{ t.problem.gapDesc }}</div>
             </div>
             <div class="method-arrow">→</div>
             <div class="method-step">
               <div class="step-icon">📊</div>
-              <div class="step-name">PCA 分析</div>
-              <div class="step-desc">維度縮減</div>
+              <div class="step-name">{{ t.problem.pca }}</div>
+              <div class="step-desc">{{ t.problem.pcaDesc }}</div>
             </div>
             <div class="method-arrow">→</div>
             <div class="method-step">
               <div class="step-icon">🤖</div>
-              <div class="step-name">機器學習</div>
-              <div class="step-desc">預測模型</div>
+              <div class="step-name">{{ t.problem.ml }}</div>
+              <div class="step-desc">{{ t.problem.mlDesc }}</div>
             </div>
             <div class="method-arrow">→</div>
             <div class="method-step">
               <div class="step-icon">💡</div>
-              <div class="step-name">SHAP</div>
-              <div class="step-desc">模型解釋</div>
+              <div class="step-name">{{ t.problem.shap }}</div>
+              <div class="step-desc">{{ t.problem.shapDesc }}</div>
             </div>
           </div>
         </div>
@@ -218,15 +228,15 @@ const getRiskColor = (level) => {
     <section id="data" class="section section-cream">
       <div class="section-container">
         <div class="section-header fade-up">
-          <span class="section-number">02</span>
-          <h2 class="section-title">資料概覽</h2>
-          <p class="section-subtitle">台灣傳播調查資料庫 2021</p>
+          <span class="section-number">{{ t.data.section }}</span>
+          <h2 class="section-title">{{ t.data.title }}</h2>
+          <p class="section-subtitle">{{ t.data.subtitle }}</p>
         </div>
 
         <!-- 資料來源大圖 -->
         <div class="data-main-image fade-up">
           <div class="main-image-card hover-lift">
-            <img src="/images/資料介紹.png" alt="資料來源" />
+            <img src="/images/資料介紹.png" alt="Data Source" />
           </div>
         </div>
 
@@ -234,41 +244,41 @@ const getRiskColor = (level) => {
         <div class="data-stats-row fade-up">
           <div class="stat-card-large hover-lift">
             <div class="stat-card-number">1,004</div>
-            <div class="stat-card-unit">份</div>
-            <div class="stat-card-label">原始樣本</div>
+            <div class="stat-card-unit">{{ t.data.unit }}</div>
+            <div class="stat-card-label">{{ t.data.original }}</div>
           </div>
           <div class="stat-card-large primary hover-lift">
             <div class="stat-card-number">672</div>
-            <div class="stat-card-unit">份</div>
-            <div class="stat-card-label">有效樣本</div>
+            <div class="stat-card-unit">{{ t.data.unit }}</div>
+            <div class="stat-card-label">{{ t.data.valid }}</div>
           </div>
           <div class="stat-card-large hover-lift">
             <div class="stat-card-number">68</div>
-            <div class="stat-card-unit">個</div>
-            <div class="stat-card-label">特徵變數</div>
+            <div class="stat-card-unit">{{ t.data.unitFeature }}</div>
+            <div class="stat-card-label">{{ t.data.features }}</div>
           </div>
           <div class="stat-card-large hover-lift">
             <div class="stat-card-number">19-61</div>
-            <div class="stat-card-unit">歲</div>
-            <div class="stat-card-label">年齡範圍</div>
+            <div class="stat-card-unit">{{ t.data.unitAge }}</div>
+            <div class="stat-card-label">{{ t.data.ageRange }}</div>
           </div>
         </div>
 
         <!-- 抽樣方法說明 -->
         <div class="data-method fade-up">
-          <div class="method-badge">抽樣方法</div>
-          <p>分層三階段 RDD 抽樣法（Stratified Three-Stage Random Digit Dialing），確保樣本具全國代表性</p>
+          <div class="method-badge">{{ t.data.samplingMethod }}</div>
+          <p>{{ t.data.samplingDesc }}</p>
         </div>
 
         <!-- 樣本分布圖 -->
         <div class="sample-distribution fade-up">
           <div class="distribution-card hover-lift">
-            <img src="/images/性別分布圖.png" alt="性別分布" />
-            <div class="distribution-label">性別分布</div>
+            <img src="/images/性別分布圖.png" alt="Gender Distribution" />
+            <div class="distribution-label">{{ t.data.genderDist }}</div>
           </div>
           <div class="distribution-card hover-lift">
-            <img src="/images/網路使用時長分布圖.png" alt="上網時長" />
-            <div class="distribution-label">每日上網時長分布</div>
+            <img src="/images/網路使用時長分布圖.png" alt="Internet Usage" />
+            <div class="distribution-label">{{ t.data.internetDist }}</div>
           </div>
         </div>
       </div>
@@ -278,20 +288,20 @@ const getRiskColor = (level) => {
     <section id="gap" class="section section-feature">
       <div class="section-container">
         <div class="section-header fade-up">
-          <span class="section-number">03</span>
-          <h2 class="section-title">GAP 廣義關聯圖分析</h2>
-          <p class="section-subtitle">識別五種典型網路使用者群體</p>
+          <span class="section-number">{{ t.gap.section }}</span>
+          <h2 class="section-title">{{ t.gap.title }}</h2>
+          <p class="section-subtitle">{{ t.gap.subtitle }}</p>
         </div>
 
         <!-- GAP 主圖 -->
         <div class="feature-showcase fade-up">
           <div class="showcase-image">
-            <img src="/images/GAP.png" alt="GAP 分析結果" />
+            <img src="/images/GAP.png" alt="GAP Analysis" />
           </div>
           <div class="showcase-insight">
-            <div class="insight-badge">關鍵發現</div>
-            <h3>透過熱圖對角線分布，清楚識別出五個行為群體</h3>
-            <p>淺黃色區塊代表群體內部高相似性，深色區塊代表群體間的行為差異</p>
+            <div class="insight-badge">{{ t.gap.keyFinding }}</div>
+            <h3>{{ t.gap.findingTitle }}</h3>
+            <p>{{ t.gap.findingDesc }}</p>
           </div>
         </div>
 
@@ -304,26 +314,26 @@ const getRiskColor = (level) => {
             :class="cluster.riskLevel"
           >
             <div class="cluster-header">
-              <span class="cluster-label">{{ cluster.label }}</span>
+              <span class="cluster-label">{{ getClusterLabel(cluster.cluster, currentLang) }}</span>
               <span class="cluster-risk" :style="{ color: getRiskColor(cluster.riskLevel) }">
-                {{ cluster.riskLevel === 'high' ? '⚠ 高風險' : cluster.riskLevel === 'medium' ? '中風險' : '✓ 低風險' }}
+                {{ cluster.riskLevel === 'high' ? t.gap.highRisk : cluster.riskLevel === 'medium' ? t.gap.mediumRisk : t.gap.lowRisk }}
               </span>
             </div>
             <div class="cluster-stats">
               <div class="cluster-stat">
                 <span class="stat-val">{{ cluster.size }}</span>
-                <span class="stat-name">人數</span>
+                <span class="stat-name">{{ t.gap.people }}</span>
               </div>
               <div class="cluster-stat">
                 <span class="stat-val">{{ cluster.meanAge }}</span>
-                <span class="stat-name">平均年齡</span>
+                <span class="stat-name">{{ t.gap.avgAge }}</span>
               </div>
               <div class="cluster-stat">
                 <span class="stat-val">{{ cluster.meanScore.toFixed(1) }}</span>
-                <span class="stat-name">霸凌分數</span>
+                <span class="stat-name">{{ t.gap.bullyScore }}</span>
               </div>
             </div>
-            <p class="cluster-desc">{{ cluster.description }}</p>
+            <p class="cluster-desc">{{ getClusterDesc(cluster.cluster, currentLang) }}</p>
           </div>
         </div>
 
@@ -331,11 +341,8 @@ const getRiskColor = (level) => {
         <div class="feature-conclusion fade-up">
           <div class="conclusion-icon">📌</div>
           <div class="conclusion-content">
-            <h4>GAP 分析結論</h4>
-            <p>
-              <strong>高風險群體（群1 + 群3）共 255 人，佔總樣本 38%</strong>。
-              其中「高風險男性群」霸凌分數最高（51.08），「重度網路使用者」每日上網超過 10 小時。
-            </p>
+            <h4>{{ t.gap.conclusionTitle }}</h4>
+            <p v-html="t.gap.conclusionText"></p>
           </div>
         </div>
       </div>
@@ -345,22 +352,22 @@ const getRiskColor = (level) => {
     <section id="pca" class="section section-light">
       <div class="section-container">
         <div class="section-header fade-up">
-          <span class="section-number">04</span>
-          <h2 class="section-title">PCA 主成分分析</h2>
-          <p class="section-subtitle">降低維度，識別網路行為主要模式</p>
+          <span class="section-number">{{ t.pca.section }}</span>
+          <h2 class="section-title">{{ t.pca.title }}</h2>
+          <p class="section-subtitle">{{ t.pca.subtitle }}</p>
         </div>
 
         <!-- PCA 主圖（上方，全寬） -->
         <div class="pca-main-chart fade-up">
           <div class="pca-chart-large hover-lift">
-            <img src="/images/主成分結構.png" alt="主成分結構" />
+            <img src="/images/主成分結構.png" alt="PCA Structure" />
           </div>
         </div>
 
         <!-- PCA 結論（大數字） -->
         <div class="pca-highlight fade-up">
           <div class="highlight-number">69.79%</div>
-          <div class="highlight-text">前四個主成分累積解釋變異量</div>
+          <div class="highlight-text">{{ t.pca.variance }}</div>
         </div>
 
         <!-- PCA 四大發現（下方，橫向排列） -->
@@ -373,8 +380,8 @@ const getRiskColor = (level) => {
             <div class="pca-finding-bar">
               <div class="pca-finding-fill" style="width: 100%;"></div>
             </div>
-            <h4>網路負面行為接觸觀察</h4>
-            <p>反映受訪者在網路上觀察到的負面行為頻率，包含攻擊、責罵、諷刺等行為</p>
+            <h4>{{ t.pca.pc1Title }}</h4>
+            <p>{{ t.pca.pc1Desc }}</p>
           </div>
 
           <div class="pca-finding-card hover-lift">
@@ -385,8 +392,8 @@ const getRiskColor = (level) => {
             <div class="pca-finding-bar">
               <div class="pca-finding-fill" style="width: 58%;"></div>
             </div>
-            <h4>網路衝突容忍程度</h4>
-            <p>反映對網路衝突行為的接受度，高分代表較能容忍對抗性互動</p>
+            <h4>{{ t.pca.pc2Title }}</h4>
+            <p>{{ t.pca.pc2Desc }}</p>
           </div>
 
           <div class="pca-finding-card hover-lift">
@@ -397,8 +404,8 @@ const getRiskColor = (level) => {
             <div class="pca-finding-bar">
               <div class="pca-finding-fill" style="width: 38%;"></div>
             </div>
-            <h4>行為-態度矛盾</h4>
-            <p>揭示認知上反對網路暴力，但實際互動中仍展現攻擊性行為的現象</p>
+            <h4>{{ t.pca.pc3Title }}</h4>
+            <p>{{ t.pca.pc3Desc }}</p>
           </div>
 
           <div class="pca-finding-card hover-lift">
@@ -409,8 +416,8 @@ const getRiskColor = (level) => {
             <div class="pca-finding-bar">
               <div class="pca-finding-fill" style="width: 25%;"></div>
             </div>
-            <h4>群體擴散效應</h4>
-            <p>網路負面行為透過群體動力產生擴散，形成連鎖反應</p>
+            <h4>{{ t.pca.pc4Title }}</h4>
+            <p>{{ t.pca.pc4Desc }}</p>
           </div>
         </div>
 
@@ -418,8 +425,8 @@ const getRiskColor = (level) => {
         <div class="pca-insight fade-up">
           <div class="insight-icon">💡</div>
           <div class="insight-content">
-            <h4>關鍵洞見</h4>
-            <p>PCA 結果顯示網路使用時間與霸凌傾向在第一主成分有較高載荷量，<strong>顯示兩者存在強烈關聯</strong>。長時間使用網路的用戶可能需要更多關注。</p>
+            <h4>{{ t.pca.insightTitle }}</h4>
+            <p v-html="t.pca.insightText"></p>
           </div>
         </div>
       </div>
@@ -429,21 +436,21 @@ const getRiskColor = (level) => {
     <section id="ml" class="section section-feature">
       <div class="section-container">
         <div class="section-header fade-up">
-          <span class="section-number">05</span>
-          <h2 class="section-title">機器學習預測模型</h2>
-          <p class="section-subtitle">多模型比較與特徵重要性分析</p>
+          <span class="section-number">{{ t.ml.section }}</span>
+          <h2 class="section-title">{{ t.ml.title }}</h2>
+          <p class="section-subtitle">{{ t.ml.subtitle }}</p>
         </div>
 
         <!-- 模型比較圖（全寬大圖） -->
         <div class="ml-main-chart fade-up">
           <div class="ml-chart-large hover-lift">
-            <img src="/images/ml/classification_results.png" alt="模型比較" />
+            <img src="/images/ml/classification_results.png" alt="Model Comparison" />
           </div>
         </div>
 
         <!-- 模型表現列表 -->
         <div class="ml-results-section fade-up">
-          <h3>模型表現比較</h3>
+          <h3>{{ t.ml.modelComparison }}</h3>
           <div class="model-cards">
             <div
               v-for="model in classificationResults"
@@ -465,16 +472,16 @@ const getRiskColor = (level) => {
             </div>
           </div>
           <div class="best-model-banner">
-            <span class="best-badge">🏆 最佳模型</span>
-            <span class="best-name">Random Forest（AUC = 0.71）</span>
+            <span class="best-badge">{{ t.ml.bestModel }}</span>
+            <span class="best-name">Random Forest (AUC = 0.71)</span>
           </div>
         </div>
 
         <!-- 特徵重要性（全寬大圖 + 互動長條） -->
         <div class="feature-importance-section fade-up">
-          <h3>特徵重要性排名</h3>
+          <h3>{{ t.ml.featureRanking }}</h3>
           <div class="importance-main-chart hover-lift">
-            <img src="/images/ml/rf_feature_importance.png" alt="特徵重要性" />
+            <img src="/images/ml/rf_feature_importance.png" alt="Feature Importance" />
           </div>
           <div class="importance-interactive">
             <div
@@ -483,7 +490,7 @@ const getRiskColor = (level) => {
               class="importance-item hover-lift"
             >
               <div class="importance-info">
-                <span class="importance-name">{{ feature.name }}</span>
+                <span class="importance-name">{{ getFeatureName(feature.feature, currentLang) }}</span>
                 <span class="importance-value">{{ (feature.importance * 100).toFixed(1) }}%</span>
               </div>
               <div class="importance-track">
@@ -498,20 +505,20 @@ const getRiskColor = (level) => {
 
         <!-- SHAP 解釋 -->
         <div class="shap-section fade-up">
-          <h3>SHAP 模型解釋</h3>
+          <h3>{{ t.ml.shapTitle }}</h3>
           <div class="shap-grid-large">
             <div class="shap-card-large hover-lift">
               <img src="/images/ml/shap_summary.png" alt="SHAP Summary" />
               <div class="shap-caption">
-                <h4>SHAP Summary Plot</h4>
-                <p>年齡越小（紅色），SHAP 值越高，被預測為高風險的機率較高</p>
+                <h4>{{ t.ml.shapSummary }}</h4>
+                <p>{{ t.ml.shapSummaryDesc }}</p>
               </div>
             </div>
             <div class="shap-card-large hover-lift">
               <img src="/images/ml/shap_bar.png" alt="SHAP Bar" />
               <div class="shap-caption">
-                <h4>特徵貢獻度</h4>
-                <p>年齡是最重要的預測因子，其次是每日上網時間與居住地區</p>
+                <h4>{{ t.ml.featureContrib }}</h4>
+                <p>{{ t.ml.featureContribDesc }}</p>
               </div>
             </div>
           </div>
@@ -522,28 +529,28 @@ const getRiskColor = (level) => {
           <div class="conclusion-box-large">
             <div class="conclusion-header">
               <span class="conclusion-icon">🔑</span>
-              <h4>關鍵發現</h4>
+              <h4>{{ t.ml.keyFinding }}</h4>
             </div>
             <div class="conclusion-items">
               <div class="conclusion-item">
                 <div class="item-number">39.7%</div>
                 <div class="item-text">
-                  <strong>年齡效應最顯著</strong>
-                  <p>年輕族群霸凌傾向明顯高於年長者</p>
+                  <strong>{{ t.ml.ageEffect }}</strong>
+                  <p>{{ t.ml.ageEffectDesc }}</p>
                 </div>
               </div>
               <div class="conclusion-item">
                 <div class="item-number">17%</div>
                 <div class="item-text">
-                  <strong>上網時間次之</strong>
-                  <p>每日上網超過 10 小時者風險顯著提升</p>
+                  <strong>{{ t.ml.internetEffect }}</strong>
+                  <p>{{ t.ml.internetEffectDesc }}</p>
                 </div>
               </div>
               <div class="conclusion-item">
                 <div class="item-number">14%</div>
                 <div class="item-text">
-                  <strong>地區差異存在</strong>
-                  <p>都會區與非都會區使用者行為模式不同</p>
+                  <strong>{{ t.ml.regionEffect }}</strong>
+                  <p>{{ t.ml.regionEffectDesc }}</p>
                 </div>
               </div>
             </div>
@@ -556,28 +563,43 @@ const getRiskColor = (level) => {
     <section id="conclusion" class="section section-conclusion">
       <div class="section-container">
         <div class="section-header fade-up">
-          <span class="section-number">06</span>
-          <h2 class="section-title">研究結論</h2>
+          <span class="section-number">{{ t.conclusion.section }}</span>
+          <h2 class="section-title">{{ t.conclusion.title }}</h2>
         </div>
 
         <!-- 四大發現 -->
         <div class="findings-grid fade-up">
-          <div
-            v-for="(finding, index) in keyFindings"
-            :key="finding.title"
-            class="finding-item"
-          >
-            <div class="finding-icon">{{ finding.icon }}</div>
+          <div class="finding-item">
+            <div class="finding-icon">👤</div>
             <div class="finding-body">
-              <h4>{{ finding.title }}</h4>
-              <p>{{ finding.description }}</p>
+              <h4>{{ t.findings.ageEffect }}</h4>
+              <p>{{ t.findings.ageEffectDesc }}</p>
             </div>
-            <div
-              class="finding-impact"
-              :class="finding.impact"
-            >
-              {{ finding.impact === 'high' ? '高影響' : '中影響' }}
+            <div class="finding-impact high">{{ t.findings.highImpact }}</div>
+          </div>
+          <div class="finding-item">
+            <div class="finding-icon">⏰</div>
+            <div class="finding-body">
+              <h4>{{ t.findings.internetEffect }}</h4>
+              <p>{{ t.findings.internetEffectDesc }}</p>
             </div>
+            <div class="finding-impact high">{{ t.findings.highImpact }}</div>
+          </div>
+          <div class="finding-item">
+            <div class="finding-icon">👨</div>
+            <div class="finding-body">
+              <h4>{{ t.findings.genderEffect }}</h4>
+              <p>{{ t.findings.genderEffectDesc }}</p>
+            </div>
+            <div class="finding-impact medium">{{ t.findings.mediumImpact }}</div>
+          </div>
+          <div class="finding-item">
+            <div class="finding-icon">😰</div>
+            <div class="finding-body">
+              <h4>{{ t.findings.psychEffect }}</h4>
+              <p>{{ t.findings.psychEffectDesc }}</p>
+            </div>
+            <div class="finding-impact high">{{ t.findings.highImpact }}</div>
           </div>
         </div>
 
@@ -586,41 +608,41 @@ const getRiskColor = (level) => {
           <div class="summary-grid">
             <div class="summary-item">
               <span class="summary-num">672</span>
-              <span class="summary-txt">有效樣本數</span>
+              <span class="summary-txt">{{ t.conclusion.validSamples }}</span>
             </div>
             <div class="summary-item highlight">
               <span class="summary-num">38%</span>
-              <span class="summary-txt">高風險群佔比</span>
+              <span class="summary-txt">{{ t.conclusion.highRiskRatio }}</span>
             </div>
             <div class="summary-item">
               <span class="summary-num">0.71</span>
-              <span class="summary-txt">最佳 AUC-ROC</span>
+              <span class="summary-txt">{{ t.conclusion.bestAuc }}</span>
             </div>
             <div class="summary-item">
               <span class="summary-num">39.7%</span>
-              <span class="summary-txt">年齡貢獻度</span>
+              <span class="summary-txt">{{ t.conclusion.ageContrib }}</span>
             </div>
           </div>
         </div>
 
         <!-- 研究價值 -->
         <div class="research-value fade-up">
-          <h3>研究貢獻</h3>
+          <h3>{{ t.conclusion.researchValue }}</h3>
           <div class="value-grid">
             <div class="value-card">
               <div class="value-icon">📚</div>
-              <h4>理論層面</h4>
-              <p>首次將 GAP 分析應用於網路行為研究，建立更完整的分析框架</p>
+              <h4>{{ t.conclusion.theoryTitle }}</h4>
+              <p>{{ t.conclusion.theoryDesc }}</p>
             </div>
             <div class="value-card">
               <div class="value-icon">🔧</div>
-              <h4>方法創新</h4>
-              <p>整合五種多變量分析方法，形成從探索到預測的完整分析鏈</p>
+              <h4>{{ t.conclusion.methodTitle }}</h4>
+              <p>{{ t.conclusion.methodDesc }}</p>
             </div>
             <div class="value-card">
               <div class="value-icon">🎯</div>
-              <h4>實務應用</h4>
-              <p>識別高風險群體特徵，為預防策略提供實證基礎</p>
+              <h4>{{ t.conclusion.practiceTitle }}</h4>
+              <p>{{ t.conclusion.practiceDesc }}</p>
             </div>
           </div>
         </div>
@@ -631,14 +653,14 @@ const getRiskColor = (level) => {
             <div class="footer-info">
               <h4>{{ projectInfo.author }}</h4>
               <p>{{ projectInfo.institution }}</p>
-              <p class="footer-source">資料來源：{{ projectInfo.dataSource }}</p>
+              <p class="footer-source">{{ currentLang === 'zh' ? '資料來源：' : 'Data Source: ' }}{{ projectInfo.dataSource }}</p>
             </div>
             <div class="footer-links">
-              <a href="https://github.com" target="_blank" class="footer-link">
+              <a href="https://github.com/timwei0801/MVA-Internet-use-and-bullying" target="_blank" class="footer-link">
                 <svg class="link-icon" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
                 </svg>
-                查看原始碼
+                {{ t.conclusion.viewSource }}
               </a>
             </div>
           </div>
@@ -732,6 +754,25 @@ const getRiskColor = (level) => {
   color: #5D8696;
   background: rgba(93, 134, 150, 0.12);
   font-weight: 600;
+}
+
+/* 語言切換按鈕 */
+.lang-toggle {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #5D8696 0%, #81b29a 100%);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 0.5rem;
+}
+
+.lang-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(93, 134, 150, 0.3);
 }
 
 /* ===== Hero Section ===== */

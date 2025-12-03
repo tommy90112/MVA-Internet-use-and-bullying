@@ -4,8 +4,11 @@
 [![Data Source](https://img.shields.io/badge/資料來源-TCS%202021-green.svg)](https://www.crctaiwan.nctu.edu.tw/)
 [![Analysis](https://img.shields.io/badge/分析方法-MVA-orange.svg)](#研究方法)
 [![Vue.js](https://img.shields.io/badge/儀表板-Vue.js-42b883.svg)](#互動式儀表板)
+[![線上展示](https://img.shields.io/badge/展示-線上版-brightgreen.svg)](https://timwei0801.github.io/MVA-Internet-use-and-bullying/)
 
 > **[English README](README.md)**
+>
+> **[線上展示 / Live Demo](https://timwei0801.github.io/MVA-Internet-use-and-bullying/)**
 
 ---
 
